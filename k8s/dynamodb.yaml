@@ -1,0 +1,53 @@
+# DynamoDB Local para o cluster kind (fase 2). Equivale ao serviço "dynamodb" do compose.yaml.
+# Aplicar:  kubectl apply -f k8s/dynamodb.yaml
+# A API acessa por APP_DYNAMODB_ENDPOINT=http://dynamodb:8000
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dynamodb
+  namespace: lab
+  labels:
+    app: dynamodb
+spec:
+  replicas: 1 # -inMemory: mais de uma réplica = bases separadas
+  selector:
+    matchLabels:
+      app: dynamodb #quais pods este DEPLOYMENT gerencia
+  template: #molde do pod, usado para criar novas réplicas
+    metadata:
+      labels:
+        app: dynamodb #precisa bater com o selector acima
+    spec:
+      containers:
+        - name: dynamodb
+          image: amazon/dynamodb-local:3.3.2
+          # -inMemory: dados somem ao reiniciar o pod. -sharedDb: uma base só, qualquer credencial/região.
+          args: ["-jar", "DynamoDBLocal.jar", "-inMemory", "-sharedDb"]
+          ports:
+            - containerPort: 8000
+          readinessProbe:
+            tcpSocket:
+              port: 8000
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 200m
+              memory: 512Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: dynamodb
+  namespace: lab
+  labels:
+    app: dynamodb
+spec:
+  selector:
+    app: dynamodb
+  ports:
+    - port: 8000
+      targetPort: 8000
+
+##Regra geral: name, namespace, labels e annotations sempre ficam dentro de metadata.
