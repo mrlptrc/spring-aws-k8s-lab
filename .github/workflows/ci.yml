@@ -25,6 +25,9 @@ jobs:
     steps:
       # Actions de terceiros fixadas por SHA (tag pode ser movida; SHA não). Dependabot atualiza.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # Não deixa o token no .git: o código do PR (mvnw, testes) não consegue lê-lo.
+          persist-credentials: false
 
       - uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
         with:
