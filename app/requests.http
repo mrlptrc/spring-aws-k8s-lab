@@ -1,0 +1,17 @@
+# Requisições de exemplo (IntelliJ HTTP Client / extensão REST Client do VS Code).
+# Equivalentes em curl estão em docs/fase-1.md.
+
+### Criar nota
+POST http://localhost:8080/notes
+Content-Type: application/json
+
+{"title": "Terraform", "content": "fase 3"}
+
+### Listar notas
+GET http://localhost:8080/notes
+
+### Health (o que o Kubernetes vai consultar)
+GET http://localhost:8080/actuator/health/readiness
+
+### Métricas no formato Prometheus
+GET http://localhost:8080/actuator/prometheus

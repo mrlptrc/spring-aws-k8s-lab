@@ -1,0 +1,21 @@
+# Ambiente local completo: API + DynamoDB Local, sem conta AWS.
+# Subir:  docker compose up --build
+# Parar:  docker compose down
+services:
+  dynamodb:
+    image: amazon/dynamodb-local:3.3.2
+    # -inMemory: dados somem ao parar. -sharedDb: uma base só, qualquer credencial/região.
+    command: -jar DynamoDBLocal.jar -inMemory -sharedDb
+    ports:
+      - "8000:8000"
+
+  api:
+    build: ./app
+    depends_on:
+      - dynamodb
+    environment:
+      # Dentro da rede do compose, o hostname é o nome do serviço.
+      APP_DYNAMODB_ENDPOINT: http://dynamodb:8000
+      APP_DYNAMODB_CREATE_TABLE: "true"
+    ports:
+      - "8080:8080"
