@@ -1,0 +1,26 @@
+# Dependabot abre PRs de atualização toda semana.
+# Grupos juntam atualizações pequenas num PR só, para não virar ruído.
+version: 2
+updates:
+  - package-ecosystem: maven
+    directory: /app
+    schedule:
+      interval: weekly
+    groups:
+      maven-minor-patch:
+        update-types: [minor, patch]
+
+  # Imagens base do Dockerfile (temurin).
+  - package-ecosystem: docker
+    directory: /app
+    schedule:
+      interval: weekly
+
+  # Actions usadas nos workflows (atualiza também os SHAs fixados).
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      actions:
+        patterns: ["*"]
