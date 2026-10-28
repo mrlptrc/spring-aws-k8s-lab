@@ -1,0 +1,15 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+# Review automático de PR pelo CodeRabbit (app do GitHub).
+language: pt-BR
+reviews:
+  # chill: foca em problemas reais, menos comentários de estilo (o Spotless já cuida disso).
+  profile: chill
+  high_level_summary: true
+  poem: false
+  auto_review:
+    enabled: true
+  path_instructions:
+    - path: "k8s/**"
+      instructions: "Verifique namespace, labels/selectors, probes e requests/limits."
+    - path: ".github/workflows/**"
+      instructions: "Verifique permissões mínimas do token e actions fixadas por SHA."

@@ -1,0 +1,4 @@
+# Commits só de formatação: git blame ignora (o GitHub lê este arquivo sozinho)
+# Local: git config blame.ignoreRevsFile .git-blame-ignore-revs (uma vez por clone)
+# style: apply palantir-java-format
+21b60a186d19df8f9bcc10912d9819435a0a7693

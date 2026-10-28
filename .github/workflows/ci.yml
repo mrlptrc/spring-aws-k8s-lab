@@ -1,0 +1,57 @@
+# CI: roda em todo PR e em push na main.
+# Cada step pode ser reproduzido localmente com o mesmo comando.
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+# Novo push no mesmo PR cancela a execução anterior.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+# Menor privilégio: o token do workflow só lê o repositório.
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      # Actions de terceiros fixadas por SHA (tag pode ser movida; SHA não). Dependabot atualiza.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # Não deixa o token no .git: o código do PR (mvnw, testes) não consegue lê-lo.
+          persist-credentials: false
+
+      - uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
+        with:
+          distribution: temurin
+          java-version: "25"
+          cache: maven
+
+      - name: Formatação (Spotless)
+        run: ./mvnw -B spotless:check
+
+      # Testcontainers usa o Docker que já vem no runner.
+      - name: Testes e build (Maven verify)
+        run: ./mvnw -B verify
+
+      - name: Lint do Dockerfile (hadolint)
+        run: docker run --rm -i hadolint/hadolint:v2.15.1 < Dockerfile
+
+      - name: Build da imagem
+        run: docker build -t notes-api:${{ github.sha }} .
+
+      # Falha só em CRITICAL/HIGH que já têm correção disponível.
+      - name: Scan de vulnerabilidades (Trivy)
+        run: >
+          docker run --rm -v /var/run/docker.sock:/var/run/docker.sock
+          aquasec/trivy:0.76.1 image
+          --severity CRITICAL,HIGH --ignore-unfixed --exit-code 1
+          notes-api:${{ github.sha }}
